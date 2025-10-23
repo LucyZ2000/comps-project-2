@@ -21,7 +21,7 @@ class Hittable(ABC):
         dx = np.array([eps, 0, 0, 0])
         dy = np.array([0, eps, 0, 0])
         dz = np.array([0, 0, eps, 0])
-        dw= np.array([0, 0, 0, eps])
+        dw = np.array([0, 0, 0, eps])
         nx = self.sdf(p + dx)[0] - self.sdf(p - dx)[0]
         ny = self.sdf(p + dy)[0] - self.sdf(p - dy)[0]
         nz = self.sdf(p + dz)[0] - self.sdf(p - dz)[0]
@@ -35,7 +35,6 @@ class Hittable(ABC):
 class Sphere(Hittable):
     '''Sphere in Spherical space
     '''
-    
     def __init__(self, center, radius, color):
         super().__init__(color)
         self.center = np.array(center)
@@ -56,7 +55,7 @@ class Cylinder(Hittable):
     
     def sdf(self, p, radius):
         r = np.sqrt(p[2]**2 + p[3]**2)
-        return np.arccos(r) - radius
+        return np.arccos(r) - radius, 
 
 class Half_space(Hittable):
     
