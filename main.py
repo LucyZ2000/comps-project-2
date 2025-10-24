@@ -7,22 +7,35 @@ from spherical_geometry import geodesic, position, orientation
 width, height = 400, 400
 aspect_ratio = width / height
 
-Q = np.eye(4)  
+#should change this stuff 
+
+Q = np.eye(4)
 cam_pos = position(Q)
 right, up, back = orientation(Q)
 
-theta = np.pi / 16
-R = rotation_matrix_4d(0, 3, theta)
-Q = R @ Q
-cam_pos = position(Q)
-right, up, back = orientation(Q)
+right, up, back = complete_tangent_basis(cam_pos)
+forward = -back
+
+theta = 0.5  
+cam_pos = geodesic(cam_pos, right, theta)  
+
+sphere1_center = geodesic(cam_pos, forward, 0.5)
+
+sphere2_dir = forward + 1.2*right
+sphere2_dir -= np.dot(sphere2_dir, cam_pos) * cam_pos  
+sphere2_dir /= np.linalg.norm(sphere2_dir)
+sphere2_center = geodesic(cam_pos, sphere2_dir, 0.5)
+
+sphere3_dir = forward + 1.2*up
+sphere3_dir -= np.dot(sphere3_dir, cam_pos) * cam_pos
+sphere3_dir /= np.linalg.norm(sphere3_dir)
+sphere3_center = geodesic(cam_pos, sphere3_dir, 0.5)
 
 objects = [
-    Sphere(center=[-1, -1, -3, 0], radius=1, color=[255, 0, 0]),
-    Sphere(center=[1, 1, -3, 0], radius=1, color=[255, 255, 0]),
-    Cylinder(radius=0.5, color=[0, 255, 255]),
-    Half_space(color=[200, 200, 200])
-]
+    Sphere(center=sphere1_center, radius=0.1, color=[255, 0, 0]),
+    Sphere(center=sphere2_center, radius=0.1, color=[0, 255, 0]),
+    Sphere(center=sphere3_center, radius=0.1, color=[0, 0, 255])
+    ]
 
 ambient = np.array([15, 15, 0])
 
@@ -59,7 +72,7 @@ for y in range(height):
                     hit_obj = obj
 
             if min_d < eps:
-                color = hit_obj.color
+                hit_color = hit_obj.color
                 break
             t += min_d
             if t > max_t:
