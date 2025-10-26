@@ -1,6 +1,7 @@
 import numpy as np
 from hittable import Sphere, Cylinder, Half_space
 from PIL import Image
+from linear_algebra import rotation_matrix_4d
 
 width, height = 400, 400
 aspect_ratio = width / height
@@ -21,7 +22,6 @@ def tangent_basis(camera_pos):
     return np.array(basis)
 
 basis = tangent_basis(camera_position)  
-
 
 objects = [
     Sphere(center=[-1, -1, -3, 0], radius=1, color=[255, 0, 0]),
@@ -70,11 +70,10 @@ for y in range(height):
                 distance = min_d
                 color = hit_obj.color
                 break
-            
+
             t += min_d
             if t > max_t:
                 break
-
 
         if hit_color is not None:
             n = hit_obj.normal(p)
