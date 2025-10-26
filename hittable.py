@@ -48,6 +48,12 @@ class Sphere(Hittable):
         return d - self.radius
     
     def normal(self, p, eps=1e-4):
+        n = self.center - p
+        n -= np.dot(n, p) * p
+        norm = np.linalg.norm(n)
+        if norm < 1e-8:
+            return np.zeros_like(n)
+        return n / norm
         pass
 
 class Cylinder(Hittable):
