@@ -15,7 +15,7 @@ def complete_tangent_basis(p):
     basis = []
     for i in range(4):
         v = np.zeros(4)
-        v[i] = 1.0
+        v[i] = 1.02
         v -= np.dot(v, p) * p  
         if np.linalg.norm(v) > 1e-6:
             v /= np.linalg.norm(v)
