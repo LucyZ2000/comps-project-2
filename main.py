@@ -7,6 +7,16 @@ from scipy.linalg import expm
 width, height = 400, 400
 aspect_ratio = width / height
 
+def move_forward(pos, forward_dir, step_size):
+    forward_dir = forward_dir - np.dot(forward_dir, pos) * pos #projects foward_dir onto tangent plane of sphere at pos
+    forward_dir /= np.linalg.norm(forward_dir) # normalize
+    
+    new_pos = geodesic(pos, forward_dir, step_size)
+    
+    new_forward = forward_dir - np.dot(forward_dir, new_pos) * new_pos 
+    new_forward /= np.linalg.norm(new_forward) 
+    
+    return new_pos, new_forward
 
 def rotation_matrix_4d(axis1, axis2, theta):
     R = np.eye(4)
