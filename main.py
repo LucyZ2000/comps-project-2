@@ -24,12 +24,16 @@ R_cam = rotation_matrix_4d(2, 1, theta) @ rotation_matrix_4d(0, 3, theta)
 Q = R_cam @ Q
 
 cam_pos = position(Q)
-right, up, back = orientation(Q)
-forward = -back
+right_cam, up_cam, back_cam = orientation(Q)
+forward_cam = -back_cam
 
-sphere1_center = geodesic(np.array([0, 0, 0, 1.0]), np.array([0, 0, 1, 0]), 0.3)
-sphere2_center = geodesic(np.array([0, 0, 0, 1.0]), np.array([0, 0, 1, 0]), 6.4)
-sphere3_center = geodesic(np.array([0, 0, 0, 1.0]), np.array([0, 0, 1, 0]), 0.5)
+origin = np.array([0, 0, 0, 1.0])
+forward_obj = np.array([0, 0, 1, 0])
+right_obj   = np.array([1, 0, 0, 0])
+
+sphere1_center = geodesic(origin, forward_obj, 0.7)
+sphere2_center = geodesic(origin, forward_obj + 0.47*right_obj, 0.7)
+sphere3_center = geodesic(origin, forward_obj - 0.7*right_obj, 0.7)
 
 objects = [
     Sphere(center=sphere1_center, radius=0.1, color=[255, 0, 0]),
@@ -65,7 +69,7 @@ def phong_shading(p, N, cam_pos, light_pos, object_color,
     return color.astype(np.uint8)
 
 image = np.zeros((height, width, 3), dtype=np.uint8)
-light_pos = np.array([-3.0, 0.0, 0.0, 0.0])
+light_pos = np.array([6.0, 6.0, -7.0, 5.0])
 light_pos /= np.linalg.norm(light_pos)
 
 image = np.zeros((height, width, 3), dtype=np.uint8)
@@ -82,7 +86,7 @@ for y in range(height):
         if aspect_ratio > 1:
             screen_x *= aspect_ratio
 
-        ray_dir = screen_x * right + screen_y * up + forward
+        ray_dir = screen_x * right_cam + screen_y * up_cam + forward_cam
         ray_dir -= np.dot(ray_dir, cam_pos) * cam_pos
         ray_dir /= np.linalg.norm(ray_dir)
 
