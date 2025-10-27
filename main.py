@@ -32,12 +32,38 @@ def move_right(pos, right_dir, step_size):
 def move_left(pos, right_dir, step_size):
     return move_right(pos, -right_dir, step_size)
 
+def tangent_to_light(p, q):
+    cos_theta = np.dot(p, q)
+    if np.isclose(cos_theta, 1.0) or np.isclose(cos_theta, -1.0):
+        raise ValueError("p and q cannot be identical or antipodal")
+    sin_theta = np.sqrt(1 - cos_theta**2)
+    v = (q - cos_theta * p) / sin_theta
+    return v / np.linalg.norm(v)
+
+def phong_shading(p, N, cam_pos, light_pos, object_color,
+                k_ambient=0.1, k_diffuse=0.6, k_specular=0.3, shininess=32,
+                light_color=np.array([1.0,1.0,1.0]), light_intensity=1.0):
+
+    L = tangent_to_light(p, light_pos)
+    V = tangent_to_light(p, cam_pos)
+    
+    diff = max(np.dot(N, L), 0.0)
+    R = 2 * np.dot(N, L) * N - L
+    spec = max(np.dot(R, V), 0.0) ** shininess
+    
+    color = (k_ambient * object_color +
+            light_intensity * light_color * (k_diffuse * diff * object_color +
+                                            k_specular * spec * light_color))
+    color = np.clip(color, 0, 255)
+    return color.astype(np.uint8)
+
 def main():
     width, height = 400, 400
     aspect_ratio = width / height
 
     Q = np.eye(4)
 
+    # rotation
     theta = 0.1
     R_cam = rotation_matrix_4d(2, 1, theta) @ rotation_matrix_4d(0, 3, theta)
     Q = R_cam @ Q
@@ -49,13 +75,16 @@ def main():
     origin = np.array([0, 0, 0, 1.0])
     forward_obj = np.array([0, 0, 1, 0])
 
-    # move forward 
     step_size = 0.5
-    origin, forward_obj = move_forward(origin, forward_obj, step_size)
+    
+    # move forward 
+    origin, forward_obj = move_forward(origin, forward_obj, 1)
 
-    # origin, forward_obj = move_forward(origin, forward_obj, 1.0)
     right_obj   = np.array([1, 0, 0, 0])
+    
+    # move right
     origin, right_obj = move_right(origin, right_obj, step_size)
+    
 
     sphere1_center = geodesic(origin, forward_obj, 0.7)
     sphere2_center = geodesic(origin, forward_obj + 0.47*right_obj, 0.7)
@@ -70,30 +99,6 @@ def main():
 
     ambient = np.array([15, 15, 0], dtype=np.uint8)
 
-    def tangent_to_light(p, q):
-        cos_theta = np.dot(p, q)
-        if np.isclose(cos_theta, 1.0) or np.isclose(cos_theta, -1.0):
-            raise ValueError("p and q cannot be identical or antipodal")
-        sin_theta = np.sqrt(1 - cos_theta**2)
-        v = (q - cos_theta * p) / sin_theta
-        return v / np.linalg.norm(v)
-
-    def phong_shading(p, N, cam_pos, light_pos, object_color,
-                    k_ambient=0.1, k_diffuse=0.6, k_specular=0.3, shininess=32,
-                    light_color=np.array([1.0,1.0,1.0]), light_intensity=1.0):
-
-        L = tangent_to_light(p, light_pos)
-        V = tangent_to_light(p, cam_pos)
-        
-        diff = max(np.dot(N, L), 0.0)
-        R = 2 * np.dot(N, L) * N - L
-        spec = max(np.dot(R, V), 0.0) ** shininess
-        
-        color = (k_ambient * object_color +
-                light_intensity * light_color * (k_diffuse * diff * object_color +
-                                                k_specular * spec * light_color))
-        color = np.clip(color, 0, 255)
-        return color.astype(np.uint8)
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
     light_pos = np.array([6.0, 6.0, -7.0, 5.0])
@@ -163,8 +168,8 @@ def main():
 
 
     img = Image.fromarray(image, mode='RGB')
-    img.save("raymarch_s3_rotated_foward_right.png")
-    print("Image saved as raymarch_s3_rotated_forward_right.png")
+    img.save("raymarch_s3_rotated_foward1_right.png")
+    print("Image saved as raymarch_s3_rotated_forward1_right.png")
 
 if __name__ == "__main__":
     main()
