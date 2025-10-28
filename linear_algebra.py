@@ -10,7 +10,6 @@ def rotation_matrix_4d(axis1, axis2, theta):
     return R
 
 #generates 3 orthonormal vectors tangent to S3 at point p using gram schmidt
-
 def complete_tangent_basis(p):
     basis = []
     for i in range(4):

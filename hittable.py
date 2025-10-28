@@ -37,6 +37,7 @@ class Hittable(ABC):
 class Sphere(Hittable):
     '''Sphere in Spherical space
     '''
+    
     def __init__(self, center, radius, color):
         super().__init__(color)
         self.center = np.array(center) / np.linalg.norm(center) #normalizes center
@@ -47,11 +48,17 @@ class Sphere(Hittable):
         return d - self.radius
     
     def normal(self, p, eps=1e-4):
-        pass
+        n = self.center - p
+        n -= np.dot(n, p) * p
+        norm = np.linalg.norm(n)
+        if norm < 1e-8:
+            return np.zeros_like(n)
+        return n / norm
 
 class Cylinder(Hittable):
-    def __init__(self, radius, color):
+    def __init__(self, center, radius, color):
         super().__init__(color)
+        self.center = np.array(center) / np.linalg.norm(center)
         self.radius = radius
     
     def sdf(self, p):

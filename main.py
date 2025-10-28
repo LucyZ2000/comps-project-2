@@ -2,60 +2,7 @@ import numpy as np
 from hittable import Sphere, Cylinder, Half_space
 from PIL import Image
 from linear_algebra import rotation_matrix_4d
-from spherical_geometry import geodesic, position, orientation
-    
-def move_forward(pos, forward_dir, step_size):
-    forward_dir = forward_dir - np.dot(forward_dir, pos) * pos #projects foward_dir onto tangent plane of sphere at pos
-    forward_dir /= np.linalg.norm(forward_dir) # normalize
-    
-    new_pos = geodesic(pos, forward_dir, step_size)
-    
-    new_forward = forward_dir - np.dot(forward_dir, new_pos) * new_pos 
-    new_forward /= np.linalg.norm(new_forward) 
-    
-    return new_pos, new_forward
-
-def move_backward(pos, forward_dir, step_size):
-    return move_forward(pos, -forward_dir, step_size)
-
-def move_right(pos, right_dir, step_size):
-    right_dir = right_dir - np.dot(right_dir, pos) * pos 
-    right_dir /= np.linalg.norm(right_dir) 
-    
-    new_pos = geodesic(pos, right_dir, step_size)
-    
-    new_right = right_dir - np.dot(right_dir, new_pos) * new_pos 
-    new_right /= np.linalg.norm(new_right) 
-    
-    return new_pos, new_right
-
-def move_left(pos, right_dir, step_size):
-    return move_right(pos, -right_dir, step_size)
-
-def tangent_to_light(p, q):
-    cos_theta = np.dot(p, q)
-    if np.isclose(cos_theta, 1.0) or np.isclose(cos_theta, -1.0):
-        raise ValueError("p and q cannot be identical or antipodal")
-    sin_theta = np.sqrt(1 - cos_theta**2)
-    v = (q - cos_theta * p) / sin_theta
-    return v / np.linalg.norm(v)
-
-def phong_shading(p, N, cam_pos, light_pos, object_color,
-                k_ambient=0.1, k_diffuse=0.6, k_specular=0.3, shininess=32,
-                light_color=np.array([1.0,1.0,1.0]), light_intensity=1.0):
-
-    L = tangent_to_light(p, light_pos)
-    V = tangent_to_light(p, cam_pos)
-    
-    diff = max(np.dot(N, L), 0.0)
-    R = 2 * np.dot(N, L) * N - L
-    spec = max(np.dot(R, V), 0.0) ** shininess
-    
-    color = (k_ambient * object_color +
-            light_intensity * light_color * (k_diffuse * diff * object_color +
-                                            k_specular * spec * light_color))
-    color = np.clip(color, 0, 255)
-    return color.astype(np.uint8)
+from spherical_geometry import geodesic, position, orientation, move_forward, move_right, phong_shading
 
 def main():
     width, height = 400, 400
@@ -78,27 +25,24 @@ def main():
     step_size = 0.5
     
     # move forward 
-    origin, forward_obj = move_forward(origin, forward_obj, 1)
+    # origin, forward_obj = move_forward(origin, forward_obj, step_size)
 
     right_obj   = np.array([1, 0, 0, 0])
     
     # move right
-    origin, right_obj = move_right(origin, right_obj, step_size)
+    # origin, right_obj = move_right(origin, right_obj, step_size)
     
-
     sphere1_center = geodesic(origin, forward_obj, 0.7)
     sphere2_center = geodesic(origin, forward_obj + 0.47*right_obj, 0.7)
     sphere3_center = geodesic(origin, forward_obj - 0.7*right_obj, 0.7)
-
+    # cylinder_center = geodesic(origin, forward_obj, 0.7)
 
     objects = [
         Sphere(center=sphere1_center, radius=0.1, color=[255, 0, 0]),
         Sphere(center=sphere2_center, radius=0.1, color=[0, 255, 0]),
-        Sphere(center=sphere3_center, radius=0.1, color=[0, 0, 255])
+        Sphere(center=sphere3_center, radius=0.1, color=[0, 0, 255]),
+        # Cylinder(center=cylinder_center, radius=0.2, color=[255, 255, 0]),
     ]
-
-    ambient = np.array([15, 15, 0], dtype=np.uint8)
-
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
     light_pos = np.array([6.0, 6.0, -7.0, 5.0])
@@ -168,7 +112,7 @@ def main():
 
 
     img = Image.fromarray(image, mode='RGB')
-    img.save("raymarch_s3_rotated_foward1_right.png")
+    img.save("images/raymarch_s3_rotated_phong_2_cylinder.png")
     print("Image saved as raymarch_s3_rotated_forward1_right.png")
 
 if __name__ == "__main__":
