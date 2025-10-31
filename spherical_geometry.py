@@ -33,7 +33,7 @@ def move_left(pos, right_dir, step_size):
 def tangent_to_light(p, q):
     cos_theta = np.dot(p, q)
     if np.isclose(cos_theta, 1.0) or np.isclose(cos_theta, -1.0):
-        raise ValueError("p and q cannot be identical or antipodal")
+        raise ValueError(f"{p, q}:p and q cannot be identical or antipodal")
     sin_theta = np.sqrt(1 - cos_theta**2)
     v = (q - cos_theta * p) / sin_theta
     return v / np.linalg.norm(v)

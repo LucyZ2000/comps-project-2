@@ -22,31 +22,33 @@ def main():
     origin = np.array([0, 0, 0, 1.0])
     forward_obj = np.array([0, 0, 1, 0])
 
-    step_size = 0.5
+    step_size = 1
     
     # move forward 
-    # origin, forward_obj = move_forward(origin, forward_obj, step_size)
+    origin, forward_obj = move_forward(origin, forward_obj, step_size)
 
-    right_obj   = np.array([1, 0, 0, 0])
+    right_obj = np.array([1, 0, 0, 0])
     
     # move right
-    # origin, right_obj = move_right(origin, right_obj, step_size)
+    origin, right_obj = move_right(origin, right_obj, step_size)
     
     sphere1_center = geodesic(origin, forward_obj, 0.7)
     sphere2_center = geodesic(origin, forward_obj + 0.47*right_obj, 0.7)
     sphere3_center = geodesic(origin, forward_obj - 0.7*right_obj, 0.7)
-    # cylinder_center = geodesic(origin, forward_obj, 0.7)
+    cylinder_center = geodesic(origin, forward_obj, 0.4)  
 
     objects = [
         Sphere(center=sphere1_center, radius=0.1, color=[255, 0, 0]),
         Sphere(center=sphere2_center, radius=0.1, color=[0, 255, 0]),
         Sphere(center=sphere3_center, radius=0.1, color=[0, 0, 255]),
-        # Cylinder(center=cylinder_center, radius=0.2, color=[255, 255, 0]),
+        Cylinder(center=cylinder_center, radius=0.1, color=[255, 255, 0]),
     ]
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
     light_pos = np.array([6.0, 6.0, -7.0, 5.0])
     light_pos /= np.linalg.norm(light_pos)
+    
+    # light_pos = geodesic(light_pos, np.array([1.0, 0.0, 0.0, 0.0]), 0.1)
 
     image = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -97,6 +99,8 @@ def main():
                     hit_color = phong_shading(p, N, cam_pos,
                                             light_pos=light_p,
                                             object_color=hit_obj.color)
+                    # hit_color = hit_obj.color
+                    
                     break
 
                 t += min_d
@@ -112,7 +116,7 @@ def main():
 
 
     img = Image.fromarray(image, mode='RGB')
-    img.save("images/raymarch_s3_rotated_phong_2_cylinder.png")
+    img.save("images/raymarch_s3_rotated_no_lighting_cylinder.png")
     print("Image saved as raymarch_s3_rotated_forward1_right.png")
 
 if __name__ == "__main__":

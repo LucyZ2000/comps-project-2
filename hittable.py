@@ -31,7 +31,6 @@ class Hittable(ABC):
         n -= np.dot(n, p) * p #projects gradient onto the tangent space
         
         return n/np.linalg.norm(n)
-        
 
 
 class Sphere(Hittable):
